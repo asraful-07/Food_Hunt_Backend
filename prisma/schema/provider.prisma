@@ -4,11 +4,9 @@ model Provider {
 
   name            String
   email           String    @unique
-  restaurantName  String    @unique
   profilePhoto    String?
   contactNumber   String?
   address         String?
-  isOpen          Boolean  @default(true)
   isDeleted       Boolean  @default(false)
   deletedAt       DateTime?
   gender          Gender

@@ -1,7 +1,8 @@
 model ProviderProfile {
   id                 String   @id @default(uuid())
   providerId         String   @unique
-
+  
+  email              String   @unique
   restaurantName     String
   image              String
   description        String?
