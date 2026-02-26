@@ -2,14 +2,15 @@ model Review {
   id         String @id @default(uuid())
   mealId     String
   customerId String
-
-  rating     Int
+  orderId    String
+  rating     Float    @default(0.0)
   comment    String?
   isDeleted  Boolean @default(false)
   deletedAt  DateTime?
   meal       Meal @relation(fields: [mealId], references: [id])
   customer   Customer @relation(fields: [customerId], references: [id])
-
+  order      Order    @relation(fields: [orderId], references: [id])
+  
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
