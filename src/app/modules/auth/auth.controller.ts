@@ -1,6 +1,13 @@
 import { Request, Response } from "express";
 import { catchAsync } from "../../shared/catchAsync";
-import { CreateCustomerService, LoginCustomerService } from "./auth.service";
+import {
+  ChangeActivateService,
+  CreateCustomerService,
+  GetAllUsersService,
+  GetMeService,
+  LoginCustomerService,
+  UpdateProfileService,
+} from "./auth.service";
 import { sendResponse } from "../../shared/sendResponse";
 import {
   setAccessTokenCookie,
@@ -50,6 +57,62 @@ export const LoginCustomerController = catchAsync(
         refreshToken,
         ...rest,
       },
+    });
+  },
+);
+
+export const GetAllUsersController = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await GetAllUsersService();
+
+    sendResponse(res, {
+      httpStatusCode: status.OK,
+      success: true,
+      message: "Fetch all user successfully",
+      data: result,
+    });
+  },
+);
+
+export const GetMeController = catchAsync(
+  async (req: Request, res: Response) => {
+    const user = req.user;
+    const result = await GetMeService(user);
+    sendResponse(res, {
+      httpStatusCode: status.OK,
+      success: true,
+      message: "Fetch all user successfully",
+      data: result,
+    });
+  },
+);
+
+export const ChangeActivateController = catchAsync(
+  async (req: Request, res: Response) => {
+    const user = req.user;
+    const payload = req.body;
+    const result = await ChangeActivateService(user, payload);
+    sendResponse(res, {
+      httpStatusCode: status.OK,
+      success: true,
+      message: "Fetch all user successfully",
+      data: result,
+    });
+  },
+);
+
+export const UpdateProfileController = catchAsync(
+  async (req: Request, res: Response) => {
+    const user = req.user;
+    const payload = req.body;
+    const { id } = req.params;
+
+    const result = await UpdateProfileService(id as string, user, payload);
+    sendResponse(res, {
+      httpStatusCode: status.OK,
+      success: true,
+      message: "Fetch all user successfully",
+      data: result,
     });
   },
 );

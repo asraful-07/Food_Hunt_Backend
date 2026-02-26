@@ -1,3 +1,5 @@
+import { Gender, UserStatus } from "../../../generated/prisma/enums";
+
 export interface IRegisterCustomerPayload {
   name: string;
   email: string;
@@ -7,4 +9,17 @@ export interface IRegisterCustomerPayload {
 export interface ILoginCustomerPayload {
   email: string;
   password: string;
+}
+
+export interface IChangeUserStatusPayload {
+  userId: string;
+  userStatus: UserStatus;
+}
+
+export interface IUpdateCustomerPayload {
+  name: string;
+  email: string;
+  profileImage: string;
+  contactNumber: string;
+  address: string;
 }
