@@ -1,5 +1,5 @@
 import express from "express";
-import { IndexRoutes } from "./app/routes";
+import { IndexRoutes } from "./app/routes/index.js";
 import cookieParser from "cookie-parser";
 import { envVars } from "./app/config/env";
 import cors from "cors";

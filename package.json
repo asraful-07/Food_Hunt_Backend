@@ -5,7 +5,13 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "tsx watch --env-file=.env ./src/server.ts",
+    "dev": "tsx watch ./src/server.ts",
+    "build": "prisma generate && tsup",
+    "start": "node dist/server.js",
+    "lint": "eslint ./src/**/*",
+    "migrate": "prisma migrate dev",
+    "generate": "prisma generate",
+    "postinstall": "prisma generate",
     "seed:Admin": "npx tsx src/app/utils/seedAdmin.ts"
   },
   "repository": {
@@ -46,6 +52,7 @@
     "multer": "^2.0.2",
     "pg": "^8.18.0",
     "qs": "^6.15.0",
+    "tsup": "^8.5.1",
     "tsx": "^4.21.0"
   }
 }

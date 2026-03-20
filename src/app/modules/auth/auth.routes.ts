@@ -4,7 +4,9 @@ import {
   CreateCustomerController,
   GetAllUsersController,
   GetMeController,
+  GetNewTokenController,
   LoginCustomerController,
+  logoutUserController,
   UpdateProfileController,
 } from "./auth.controller";
 import { checkAuth } from "../../middleware/checkAuth";
@@ -14,11 +16,17 @@ const router = Router();
 
 router.post("/register", CreateCustomerController);
 router.post("/login", LoginCustomerController);
+router.post("/refresh-token", GetNewTokenController);
 router.get("/all-user", checkAuth(Roles.ADMIN), GetAllUsersController);
 router.get(
   "/me",
   checkAuth(Roles.ADMIN, Roles.PROVIDER, Roles.CUSTOMER),
   GetMeController,
+);
+router.post(
+  "/logout",
+  checkAuth(Roles.ADMIN, Roles.PROVIDER, Roles.CUSTOMER),
+  logoutUserController,
 );
 router.patch("/status/:id", checkAuth(Roles.ADMIN), ChangeActivateController);
 router.put(

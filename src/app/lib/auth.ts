@@ -3,6 +3,7 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma";
 import { Roles, UserStatus } from "../../generated/prisma/enums";
 import { envVars } from "../config/env";
+import { oAuthProxy } from "better-auth/plugins";
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -52,9 +53,10 @@ export const auth = betterAuth({
     },
   },
 
+  baseURL: envVars.APP_URL,
   trustedOrigins: [
-    envVars.BETTER_AUTH_URL || "http://localhost:5002",
     envVars.APP_URL,
+    envVars.BETTER_AUTH_URL || "http://localhost:5002",
   ],
 
   advanced: {
@@ -79,4 +81,6 @@ export const auth = betterAuth({
       },
     },
   },
+
+  plugins: [oAuthProxy()],
 });

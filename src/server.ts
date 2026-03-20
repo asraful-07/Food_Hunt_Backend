@@ -1,5 +1,5 @@
-import app from "./app.js";
-import { envVars } from "./app/config/env.js";
+import app from "./app";
+import { envVars } from "./app/config/env";
 
 const PROT = envVars.PORT || 5002;
 

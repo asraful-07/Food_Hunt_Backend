@@ -11,6 +11,9 @@ import {
   IRegisterCustomerPayload,
   IUpdateCustomerPayload,
 } from "./auth.interface";
+import { JwtPayload } from "jsonwebtoken";
+import { envVars } from "../../config/env";
+import { verifyToken } from "../../utils/jwt";
 
 export const CreateCustomerService = async (
   payload: IRegisterCustomerPayload,
@@ -109,6 +112,82 @@ export const LoginCustomerService = async (payload: ILoginCustomerPayload) => {
   return { ...data, accessToken, refreshToken };
 };
 
+export const GetNewTokenService = async (
+  refreshToken: string,
+  sessionToken: string,
+) => {
+  const isSessionTokenExists = prisma.session.findUnique({
+    where: {
+      id: sessionToken,
+    },
+    include: {
+      user: true,
+    },
+  });
+
+  if (!isSessionTokenExists) {
+    throw new AppError(status.UNAUTHORIZED, "Invalid session token");
+  }
+
+  const verifiedRefreshToken = verifyToken(
+    refreshToken,
+    envVars.REFRESH_TOKEN_SECRET,
+  );
+
+  if (!verifiedRefreshToken.success) {
+    throw new AppError(status.UNAUTHORIZED, "Invalid refresh token");
+  }
+
+  const data = verifiedRefreshToken as JwtPayload;
+
+  const newAccessToken = getAccessToken({
+    userId: data.userId,
+    role: data.role,
+    name: data.name,
+    email: data.email,
+    status: data.status,
+    isDeleted: data.isDeleted,
+    emailVerified: data.emailVerified,
+  });
+
+  const newRefreshToken = getRefreshToken({
+    userId: data.userId,
+    role: data.role,
+    name: data.name,
+    email: data.email,
+    status: data.status,
+    isDeleted: data.isDeleted,
+    emailVerified: data.emailVerified,
+  });
+
+  const { token } = await prisma.session.update({
+    where: {
+      token: sessionToken,
+    },
+    data: {
+      token: sessionToken,
+      expiresAt: new Date(Date.now() + 60 * 60 * 60 * 24 * 1000),
+      updatedAt: new Date(),
+    },
+  });
+
+  return {
+    accessToken: newAccessToken,
+    refreshToken: newRefreshToken,
+    sessionToken: token,
+  };
+};
+
+export const logoutUserService = async (sessionToken: string) => {
+  const result = await auth.api.signOut({
+    headers: new Headers({
+      Authorization: `Bearer ${sessionToken}`,
+    }),
+  });
+
+  return result;
+};
+
 export const GetAllUsersService = async () => {
   const result = await prisma.user.findMany({
     include: {
@@ -184,12 +263,10 @@ export const UpdateProfileService = async (
   user: IRequestUser,
   payload: IUpdateCustomerPayload,
 ) => {
-  // 1️⃣ Check logged in user is same as updating user
   if (id !== user.userId) {
     throw new AppError(status.FORBIDDEN, "You cannot update other profile");
   }
 
-  // 2️⃣ Find user with role
   const existingUser = await prisma.user.findUnique({
     where: { id },
     include: { customer: true },
@@ -203,9 +280,7 @@ export const UpdateProfileService = async (
     throw new AppError(status.BAD_REQUEST, "This is not a customer");
   }
 
-  // 3️⃣ Transaction update (Best Practice)
   const result = await prisma.$transaction(async (tx) => {
-    // Update User table
     await tx.user.update({
       where: { id },
       data: {
@@ -213,7 +288,6 @@ export const UpdateProfileService = async (
       },
     });
 
-    // Update Customer table
     const updatedCustomer = await tx.customer.update({
       where: { userId: id },
       data: {

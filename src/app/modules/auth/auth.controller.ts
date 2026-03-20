@@ -5,7 +5,9 @@ import {
   CreateCustomerService,
   GetAllUsersService,
   GetMeService,
+  GetNewTokenService,
   LoginCustomerService,
+  logoutUserService,
   UpdateProfileService,
 } from "./auth.service";
 import { sendResponse } from "../../shared/sendResponse";
@@ -15,6 +17,8 @@ import {
   setRefreshTokenCookie,
 } from "../../utils/token";
 import status from "http-status";
+import AppError from "../../errorHelper/AppError";
+import { clearCookie } from "../../utils/cookie";
 
 export const CreateCustomerController = catchAsync(
   async (req: Request, res: Response) => {
@@ -57,6 +61,68 @@ export const LoginCustomerController = catchAsync(
         refreshToken,
         ...rest,
       },
+    });
+  },
+);
+
+export const GetNewTokenController = catchAsync(
+  async (req: Request, res: Response) => {
+    const refreshToken = req.cookies.refreshToken;
+    const betterAuthSessionToken = req.cookies["better-auth.session_token"];
+
+    if (!refreshToken) {
+      throw new AppError(status.UNAUTHORIZED, "Refresh token is missing");
+    }
+
+    const result = await GetNewTokenService(
+      refreshToken,
+      betterAuthSessionToken,
+    );
+
+    const { accessToken, refreshToken: newRefreshToken, sessionToken } = result;
+
+    setAccessTokenCookie(res, accessToken);
+    setAccessTokenCookie(res, newRefreshToken);
+    setBetterAuthSessionCookie(res, sessionToken);
+
+    sendResponse(res, {
+      httpStatusCode: status.OK,
+      success: true,
+      message: "New tokens generated successfully",
+      data: {
+        accessToken,
+        refreshToken: newRefreshToken,
+        sessionToken,
+      },
+    });
+  },
+);
+
+export const logoutUserController = catchAsync(
+  async (req: Request, res: Response) => {
+    const betterAuthSessionToken = req.cookies["better-auth.session_token"];
+    const result = await logoutUserService(betterAuthSessionToken);
+    clearCookie(res, "accessToken", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    });
+    clearCookie(res, "refreshToken", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    });
+    clearCookie(res, "better-auth.session_token", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    });
+
+    sendResponse(res, {
+      httpStatusCode: status.OK,
+      success: true,
+      message: "User logged out successfully",
+      data: result,
     });
   },
 );
