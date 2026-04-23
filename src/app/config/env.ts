@@ -4,7 +4,7 @@ dotenv.config();
 
 interface EnvConfig {
   NODE_ENV: string;
-  PORT: string;
+  PORT?: string;
   DATABASE_URL: string;
   BETTER_AUTH_SECRET: string;
   BETTER_AUTH_URL: string;
@@ -35,7 +35,6 @@ interface EnvConfig {
 const loadEnvVariables = (): EnvConfig => {
   const requireEnvVariable = [
     "NODE_ENV",
-    "PORT",
     "DATABASE_URL",
     "BETTER_AUTH_SECRET",
     "BETTER_AUTH_URL",
@@ -69,9 +68,8 @@ const loadEnvVariables = (): EnvConfig => {
     }
   });
 
-  return {
+  const result: EnvConfig = {
     NODE_ENV: process.env.NODE_ENV as string,
-    PORT: process.env.PORT as string,
     DATABASE_URL: process.env.DATABASE_URL as string,
     BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET as string,
     BETTER_AUTH_URL: process.env.BETTER_AUTH_URL as string,
@@ -84,22 +82,18 @@ const loadEnvVariables = (): EnvConfig => {
       .BETTER_AUTH_SESSION_TOKEN_EXPIRES_IN as string,
     BETTER_AUTH_SESSION_TOKEN_UPDATE_AGE: process.env
       .BETTER_AUTH_SESSION_TOKEN_UPDATE_AGE as string,
-    // EMAIL_SENDER: {
-    //   SMTP_USER: process.env.EMAIL_SENDER_SMTP_USER as string,
-    //   SMTP_PASS: process.env.EMAIL_SENDER_SMTP_PASS as string,
-    //   SMTP_HOST: process.env.EMAIL_SENDER_SMTP_HOST as string,
-    //   SMTP_PORT: process.env.EMAIL_SENDER_SMTP_PORT as string,
-    //   SMTP_FROM: process.env.EMAIL_SENDER_SMTP_FROM as string,
-    // },
-    // GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID as string,
-    // GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET as string,
-    // GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL as string,
     CLOUDINARY: {
       CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME as string,
       CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY as string,
       CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET as string,
     },
   };
+
+  if (process.env.PORT) {
+    result.PORT = process.env.PORT;
+  }
+
+  return result;
 };
 
 export const envVars = loadEnvVariables();

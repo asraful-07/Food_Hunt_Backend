@@ -1,16 +1,8 @@
 import app from "./app";
 import { envVars } from "./app/config/env";
 
-const PROT = envVars.PORT || 5002;
+const PORT = envVars.PORT;
 
-const bootstrap = () => {
-  try {
-    app.listen(PROT, () => {
-      console.log(`Server on running ${PROT}`);
-    });
-  } catch (err: any) {
-    console.error("Failed to start server:", err);
-  }
-};
-
-bootstrap();
+app.listen(PORT, () => {
+  console.log(`Server is running on port: ${PORT}`);
+});

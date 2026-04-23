@@ -17,7 +17,9 @@ app.use(
       envVars.APP_URL,
       envVars.BETTER_AUTH_URL,
       "http://localhost:3000",
-      "http://localhost:5002",
+      "http://localhost:5000",
+      "https://foodhunt-client.vercel.app",
+      "https://food-hunt-server-three.vercel.app",
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
@@ -34,7 +36,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 //* Routes
-app.use("/api/v2", IndexRoutes);
+app.use("/api/v1", IndexRoutes);
 
 app.get("/", (req, res) => {
   res.send("Food Hunt Backend Server");

@@ -3,3 +3,6 @@ node_modules
 .emv*
 /src/generated
 .vercel
+.env*.local
+dist
+build
